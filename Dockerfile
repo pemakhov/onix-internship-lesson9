@@ -8,6 +8,6 @@ COPY ./dist/ ./dist
 
 RUN npm install
 
-EXPOSE 3000
+EXPOSE 4000
 
 CMD ["node", "dist/main"]
