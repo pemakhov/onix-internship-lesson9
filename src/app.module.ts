@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose'
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BooksModule } from './books/books.module';
@@ -11,7 +11,13 @@ const mongodbUrl = 'mongodb+srv://dbUser:VEGw6D3wP642Zcum@cluster0-adcsk.mongodb
   imports: [
     BooksModule,
     UsersModule,
-    MongooseModule.forRoot(mongodbUrl),
+    TypeOrmModule.forRoot({
+      type: 'mongodb',
+      url: mongodbUrl,
+      autoLoadEntities: true,
+      synchronize: true,
+      useNewUrlParser: true,
+    }),
 ],
   controllers: [AppController],
   providers: [AppService],

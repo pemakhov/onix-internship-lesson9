@@ -1,19 +1,36 @@
-import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './interfaces/user.interface';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto'
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
-  
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) { }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const createdUser = new this.userModel(createUserDto);
-    return createdUser.save();
+    const createdUser = new User();
+    createdUser.firstName = createUserDto.firstName;
+    createdUser.lastName = createUserDto.lastName;
+    createdUser.email = createUserDto.email;
+    createdUser.phone = createUserDto.phone;
+    createdUser.isAdmin = createUserDto.isAdmin;
+    createdUser.verified = createUserDto.verified;
+
+    const errors = await validate(createdUser);
+
+    if (errors.length > 0) {
+      throw new HttpException('Validation failed!', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.usersRepository.save(createdUser);
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+    return this.usersRepository.find();
   }
 }
